@@ -12814,6 +12814,13 @@ def _command_has_dedicated_mcp_startup(args) -> bool:
         return True
     if args.command == "cron" and getattr(args, "cron_command", None) in {"run", "tick"}:
         return True
+    if args.command == "mcp" and getattr(args, "mcp_action", None) == "serve":
+        # `mcp serve` exposes Hermes conversations *as* an MCP server; its tool
+        # surface is the messaging bridge, not downstream MCP tools.  Running
+        # inline client-side discovery here dials every configured MCP server
+        # before the stdio handshake, pushing startup past the 30s timeout most
+        # MCP clients use (Claude Code reports "Failed to connect").
+        return True
     return False
 
 
