@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 2,
+  "project": "Hermes one-shot skill preload passthrough",
+  "company": "Helix",
+  "artifactType": "infrastructure",
+  "icp": "Helix operators running bounded Hermes specialist workers",
+  "pain": "The top-level Hermes --oneshot parser accepts --skills but drops it before agent construction, so controller workers can run without their required skill instructions.",
+  "revenueHypothesis": "Fail-closed one-shot skill preloading lets the sole Helix controller delegate bounded commercial work to specialist profiles with auditable role instructions.",
+  "mvpAcceptance": [
+    "Both top-level one-shot entry paths pass the parsed --skills values into hermes_cli.oneshot.run_oneshot.",
+    "One-shot execution resolves only explicit skills, fails when every requested skill is missing, and injects the exact loaded skill bodies into the cached and persisted system prompt before the first model call.",
+    "Behavioral tests cover normal and Termux entry paths, repeated and comma-separated values, partial and total missing-skill cases, and persisted system-prompt proof.",
+    "The exact clean commit is pushed to jaimedhenriques/hermes-agent, checks pass, and an independent checker accepts the implementation before the controller binds to it."
+  ],
+  "maker": "Codex Hermes one-shot implementation specialist",
+  "codingTool": "codex",
+  "rollback": "Revert the exact one-shot skills commit; the live hourly controller remains unchanged until the parent activation transaction passes.",
+  "stopConditions": [
+    "Stop on unrelated-file overlap, secret exposure, prompt-cache regression, missing-skill fail-open behavior, test failure, checker rejection, or three failed attempts."
+  ],
+  "evidenceDestination": ".helix/evidence",
+  "executionEvidence": ".helix/evidence/execution.json",
+  "copySafety": {
+    "publicPatternSources": [],
+    "proprietaryAssetsExcluded": true
+  },
+  "limits": {
+    "maxMinutes": 45,
+    "maxAgents": 3,
+    "maxAttempts": 3
+  },
+  "github": {
+    "repo": "jaimedhenriques/hermes-agent",
+    "remote": "origin",
+    "branch": "main",
+    "baseBranch": "main",
+    "commit": "HEAD"
+  },
+  "vercel": {
+    "mode": "not_applicable",
+    "category": "infrastructure",
+    "exceptionReason": "This is a local Hermes CLI/runtime code path; Vercel cannot execute or verify profile-scoped one-shot workers.",
+    "runtimeEvidence": ".helix/evidence/runtime.json",
+    "approvalEvidence": "controller://exception/hermes-oneshot-skills-20260808"
+  },
+  "verification": {
+    "checks": [
+      {
+        "name": "verify",
+        "evidence": ".helix/evidence/checks.json"
+      }
+    ],
+    "checker": "Codex native independent quality challenger",
+    "checkerEvidence": "controller://checker/hermes-oneshot-skills-20260808"
+  }
+}

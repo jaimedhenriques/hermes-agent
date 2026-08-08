@@ -353,7 +353,19 @@ def test_termux_fast_cli_launch_oneshot_uses_light_parser(monkeypatch, main_mod)
     monkeypatch.setattr(
         sys,
         "argv",
-        ["hermes", "-z", "hello", "--model", "gpt-test", "--provider", "openai"],
+        [
+            "hermes",
+            "-z",
+            "hello",
+            "--model",
+            "gpt-test",
+            "--provider",
+            "openai",
+            "--skills",
+            "first-skill,second-skill",
+            "--skills",
+            "first-skill",
+        ],
     )
     monkeypatch.setattr(
         main_mod, "_prepare_agent_startup", lambda args: prepared.append(args.command)
@@ -379,6 +391,7 @@ def test_termux_fast_cli_launch_oneshot_uses_light_parser(monkeypatch, main_mod)
         "model": "gpt-test",
         "provider": "openai",
         "toolsets": None,
+        "skills": ["first-skill,second-skill", "first-skill"],
         "usage_file": None,
     }
 
@@ -577,7 +590,19 @@ def test_main_top_level_oneshot_accepts_toolsets(monkeypatch, main_mod):
     import hermes_cli.config as config_mod
 
     monkeypatch.setattr(
-        sys, "argv", ["hermes", "-z", "hello", "--toolsets", "web,terminal"]
+        sys,
+        "argv",
+        [
+            "hermes",
+            "-z",
+            "hello",
+            "--toolsets",
+            "web,terminal",
+            "--skills",
+            "first-skill,second-skill",
+            "--skills",
+            "first-skill",
+        ],
     )
     monkeypatch.setitem(
         sys.modules,
@@ -618,6 +643,7 @@ def test_main_top_level_oneshot_accepts_toolsets(monkeypatch, main_mod):
         "model": None,
         "provider": None,
         "toolsets": "web,terminal",
+        "skills": ["first-skill,second-skill", "first-skill"],
         "usage_file": None,
     }
 
