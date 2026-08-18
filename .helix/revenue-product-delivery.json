@@ -48,7 +48,7 @@
   "verification": {
     "checks": [
       {
-        "name": "All required checks pass",
+        "name": "Python lints / ruff enforcement (blocking)",
         "evidence": ".helix/evidence/approval-mode-refactor/checks.json"
       }
     ],
