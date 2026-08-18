@@ -50,6 +50,29 @@ def _normalize_toolsets(toolsets: object = None) -> list[str] | None:
     return [item for item in normalized if item] or None
 
 
+def _normalize_skills(skills: object = None) -> list[str]:
+    """Flatten repeated/comma-separated skill flags in stable order."""
+    if not skills:
+        return []
+
+    raw_items = [skills] if isinstance(skills, str) else skills
+    if not isinstance(raw_items, (list, tuple)):
+        raw_items = [raw_items]
+
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for item in raw_items:
+        if item is None:
+            continue
+        for part in str(item).split(","):
+            identifier = part.strip()
+            if not identifier or identifier in seen:
+                continue
+            seen.add(identifier)
+            normalized.append(identifier)
+    return normalized
+
+
 def _validate_explicit_toolsets(toolsets: object = None) -> tuple[list[str] | None, str | None]:
     normalized = _normalize_toolsets(toolsets)
     if normalized is None:
@@ -172,6 +195,7 @@ def run_oneshot(
     model: Optional[str] = None,
     provider: Optional[str] = None,
     toolsets: object = None,
+    skills: object = None,
     usage_file: Optional[str] = None,
 ) -> int:
     """Execute a single prompt and print only the final content block.
@@ -183,6 +207,8 @@ def run_oneshot(
         provider: Optional provider override. Falls back to config.yaml's
             model.provider, then "auto".
         toolsets: Optional comma-separated string or iterable of toolsets.
+        skills: Optional repeated/comma-separated skill identifiers to preload
+            into the cached system prompt for this one-shot session.
         usage_file: Optional path; when set, a JSON usage report (estimated
             cost, token counts, model, api_calls) is written there after the
             run — even when the run fails — so pipelines can account for
@@ -216,6 +242,40 @@ def run_oneshot(
         return 2
     use_config_toolsets = _normalize_toolsets(toolsets) is None
 
+    normalized_skills = _normalize_skills(skills)
+    skills_prompt: str | None = None
+    if normalized_skills:
+        try:
+            from agent.skill_commands import build_preloaded_skills_prompt
+
+            built_prompt, loaded_skills, missing_skills = build_preloaded_skills_prompt(
+                normalized_skills,
+                task_id=None,
+            )
+        except Exception as exc:
+            sys.stderr.write(f"hermes -z: failed to load --skills: {exc}\n")
+            return 2
+
+        if not loaded_skills:
+            unavailable = missing_skills or normalized_skills
+            sys.stderr.write(
+                "hermes -z: --skills did not load any requested skills: "
+                f"{', '.join(unavailable)}.\n"
+            )
+            return 2
+        if not (built_prompt or "").strip():
+            sys.stderr.write(
+                "hermes -z: --skills loaded no system-prompt content; refusing to run.\n"
+            )
+            return 2
+        if missing_skills:
+            sys.stderr.write(
+                "hermes -z: unavailable --skills entries: "
+                f"{', '.join(missing_skills)}. Continuing with: "
+                f"{', '.join(loaded_skills)}.\n"
+            )
+        skills_prompt = built_prompt
+
     # Auto-approve any shell / tool approvals.  Non-interactive by
     # definition — a prompt would hang forever.
     os.environ["HERMES_YOLO_MODE"] = "1"
@@ -248,6 +308,7 @@ def run_oneshot(
                     provider=provider,
                     toolsets=explicit_toolsets,
                     use_config_toolsets=use_config_toolsets,
+                    system_message=skills_prompt,
                 )
             except BaseException as exc:  # noqa: BLE001
                 # Capture anything that escapes the agent (including OSError
@@ -325,6 +386,7 @@ def _run_agent(
     provider: Optional[str] = None,
     toolsets: object = None,
     use_config_toolsets: bool = True,
+    system_message: Optional[str] = None,
 ) -> tuple[str, dict]:
     """Build an AIAgent exactly like a normal CLI chat turn would, then
     run a single conversation.  Returns ``(final_response, run_result)``."""
@@ -468,7 +530,7 @@ def _run_agent(
         agent.stream_delta_callback = None
         agent.tool_gen_callback = None
 
-        result = agent.run_conversation(prompt)
+        result = agent.run_conversation(prompt, system_message=system_message)
         return (result.get("final_response") or "", result)
     finally:
         # Ordering deliberately mirrors gateway/run.py:_cleanup_agent_resources,

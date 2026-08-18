@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 2,
+  "project": "Hermes Desktop Bot Mode integration",
+  "company": "Helix",
+  "artifactType": "macos-agent",
+  "icp": "Jaime Henriques and the Helix specialist-agent fleet",
+  "pain": "The existing Hermes Desktop build cannot expose durable profiles as specialized Bots or coordinate them in group chats without losing two Helix runtime fixes.",
+  "revenueHypothesis": "A durable multi-Bot operating surface lowers model and coordination cost and accelerates verified delivery across Finsyt, Cardr, and other Helix revenue products.",
+  "mvpAcceptance": [
+    "Official Bot Mode source and UI tests pass at the pinned upstream commit plus the two preserved Helix regression fixes.",
+    "The installed macOS app exposes the existing profile roster as named Bots with independent role, model, memory, skills, avatar metadata, and history.",
+    "A bounded three-Bot group chat demonstrates bot-to-bot mention routing and survives an app restart.",
+    "Existing profile histories remain readable and the encrypted rollback bundle verifies."
+  ],
+  "maker": "codex-cli-maker",
+  "codingTool": "codex",
+  "rollback": "Restore the pre-Bot-Mode Git branch and app bundle; mount the AES-256 rollback image with its secret-store key and restore profile databases or metadata only if readback proves corruption.",
+  "stopConditions": [
+    "Stop on secret exposure, profile loss, database corruption, target ambiguity, more than three failed implementation attempts, or failure of Bot Mode/history-persistence acceptance."
+  ],
+  "evidenceDestination": ".helix/evidence",
+  "executionEvidence": ".helix/evidence/execution.json",
+  "copySafety": {
+    "publicPatternSources": [
+      "https://github.com/NousResearch/hermes-agent"
+    ],
+    "proprietaryAssetsExcluded": true
+  },
+  "limits": {
+    "maxMinutes": 45,
+    "maxAgents": 3,
+    "maxAttempts": 3
+  },
+  "github": {
+    "repo": "jaimedhenriques/hermes-agent",
+    "remote": "origin",
+    "branch": "helix/bot-mode-20260818",
+    "baseBranch": "main",
+    "commit": "HEAD"
+  },
+  "vercel": {
+    "mode": "not_applicable",
+    "category": "macos-agent",
+    "exceptionReason": "Hermes Desktop and its local Python runtime execute as a native macOS agent and cannot be hosted on Vercel.",
+    "runtimeEvidence": ".helix/evidence/runtime.json",
+    "approvalEvidence": "controller://exception/hermes-desktop-bot-mode-20260818"
+  },
+  "verification": {
+    "checks": [
+      {
+        "name": "Hermes Bot Mode integration",
+        "evidence": ".helix/evidence/checks.json"
+      }
+    ],
+    "checker": "independent-hermes-quality-checker",
+    "checkerEvidence": "controller://checker/hermes-desktop-bot-mode-20260818"
+  }
+}
