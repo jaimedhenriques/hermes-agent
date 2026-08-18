@@ -24,16 +24,17 @@ class ApprovalModeResult:
     message: str
 
 
-def _effective_mode() -> str:
-    """Return the exact mode enforced by the terminal approval guard."""
+def get_effective_approval_mode() -> str:
+    """Return the effective approval mode, failing safe for unknown values."""
     from tools.approval import _get_approval_mode
 
-    return _get_approval_mode()
+    mode = _get_approval_mode()
+    return mode if mode in VALID_APPROVAL_MODES else "manual"
 
 
 def run_approval_mode_command(requested_mode: Optional[str]) -> ApprovalModeResult:
     """Inspect or persist ``approvals.mode`` through canonical config APIs."""
-    current = _effective_mode()
+    current = get_effective_approval_mode()
     requested = (requested_mode or "").strip().lower()
 
     if not requested:
@@ -71,7 +72,7 @@ def run_approval_mode_command(requested_mode: Optional[str]) -> ApprovalModeResu
             f"Failed to save approval mode: {exc}",
         )
 
-    effective = _effective_mode()
+    effective = get_effective_approval_mode()
     if effective != requested:
         return ApprovalModeResult(
             False,

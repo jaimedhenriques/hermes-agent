@@ -31,6 +31,10 @@ from hermes_constants import (
     reset_hermes_home_override,
     set_hermes_home_override,
 )
+from hermes_cli.approval_mode import (
+    VALID_APPROVAL_MODES,
+    get_effective_approval_mode,
+)
 from hermes_cli.env_loader import load_hermes_dotenv
 from utils import is_truthy_value
 from tools.environments.local import hermes_subprocess_env
@@ -4307,28 +4311,11 @@ def _write_config_key(key_path: str, value):
 
 
 _STATUSBAR_MODES = frozenset({"off", "top", "bottom"})
-_APPROVAL_MODES = frozenset({"manual", "smart", "off"})
 
 
 def _load_approval_mode() -> str:
-    """Resolve the effective ``approvals.mode`` for the TUI surface.
-
-    Delegates to the canonical resolver in ``tools.approval``
-    (``_get_approval_mode``) so mode resolution cannot drift per surface —
-    the same normalization, defaults, and config precedence the approval
-    gate itself uses (see ``tools/approval.py``).
-
-    Previously this re-read the config raw via ``_load_cfg`` +
-    ``_deep_merge(DEFAULT_CONFIG, ...)`` and normalized locally, which
-    could disagree with the gate's own view of the mode (e.g. the
-    canonical ``hermes_cli.config.load_config`` path applies managed-scope
-    overlays and ``${VAR}`` env expansion that the TUI's raw YAML read did
-    not fully mirror).
-    """
-    from tools.approval import _get_approval_mode
-
-    mode = _get_approval_mode()
-    return mode if mode in _APPROVAL_MODES else "manual"
+    """Resolve the shared effective ``approvals.mode`` for the TUI surface."""
+    return get_effective_approval_mode()
 
 
 def _coerce_statusbar(raw) -> str:
@@ -12013,7 +12000,7 @@ def _(rid, params: dict) -> dict:
 
     if key in {"approval_mode", "approvals.mode"}:
         raw = str(value or "").strip().lower()
-        if raw not in _APPROVAL_MODES:
+        if raw not in VALID_APPROVAL_MODES:
             return _err(
                 rid,
                 4002,
