@@ -50,8 +50,11 @@ def _isolate_config(monkeypatch, home):
     managed_scope.invalidate_managed_cache()
 
 
+def test_effective_approval_mode_fails_safe_for_unexpected_guard_value():
+    from hermes_cli.approval_mode import get_effective_approval_mode
 
-
+    with patch("tools.approval._get_approval_mode", return_value="unexpected"):
+        assert get_effective_approval_mode() == "manual"
 
 
 def test_shared_command_refuses_managed_mode_override(tmp_path, monkeypatch):
@@ -74,7 +77,6 @@ def test_shared_command_refuses_managed_mode_override(tmp_path, monkeypatch):
     assert result.changed is False
     assert "managed" in result.message.lower()
     assert not (home / "config.yaml").exists()
-
 
 
 
