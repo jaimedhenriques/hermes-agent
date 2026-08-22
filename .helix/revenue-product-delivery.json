@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 2,
+  "project": "Hermes approval-mode refactor",
+  "company": "Helix",
+  "artifactType": "macos-agent",
+  "icp": "Hermes Agent users who switch dangerous-command approval policy across CLI, TUI, desktop, gateway, and cron surfaces",
+  "pain": "Approval-mode ownership is split across shared command logic and TUI gateway helpers, increasing the chance that valid values, effective readback, or managed-policy behavior drift by surface.",
+  "revenueHypothesis": "A single tested approval-mode contract reduces security regressions and maintenance time in the Hermes runtime used to deliver Helix revenue products.",
+  "mvpAcceptance": [
+    "The valid approval modes and effective-mode read path have one shared owner used by the cross-surface command and TUI gateway.",
+    "Existing manual, smart, and off behavior remains unchanged across CLI, gateway, and TUI config reads.",
+    "Focused approval command, gateway, approval parity, and TUI gateway tests pass without weakening or deleting assertions.",
+    "The branch is clean, committed, pushed to origin, and independently reviewed against the exact commit."
+  ],
+  "maker": "codex-cli-maker",
+  "codingTool": "codex",
+  "rollback": "Revert the single approval-mode refactor commit or reset the task branch to base commit 474b7e3579ff16226aaa8d4abf9600a2da5867b4; the active Hermes install and live config remain untouched during development.",
+  "stopConditions": [
+    "Stop on approval behavior change, managed-policy bypass, prompt-cache mutation, unrelated source edits, secret exposure, more than two implementation attempts, or any focused regression test that cannot pass without weakening it."
+  ],
+  "evidenceDestination": ".helix/evidence/approval-mode-refactor",
+  "executionEvidence": ".helix/evidence/approval-mode-refactor/execution.json",
+  "copySafety": {
+    "publicPatternSources": [
+      "https://github.com/NousResearch/hermes-agent"
+    ],
+    "proprietaryAssetsExcluded": true
+  },
+  "limits": {
+    "maxMinutes": 45,
+    "maxAgents": 3,
+    "maxAttempts": 2
+  },
+  "github": {
+    "repo": "jaimedhenriques/hermes-agent",
+    "remote": "origin",
+    "branch": "helix/refactor-approval-mode-20260818",
+    "baseBranch": "helix/bot-mode-20260818",
+    "commit": "HEAD"
+  },
+  "vercel": {
+    "mode": "not_applicable",
+    "category": "macos-agent",
+    "exceptionReason": "Hermes approval policy is part of the local Python runtime and TUI/desktop backend, not a Vercel-hosted web application.",
+    "runtimeEvidence": ".helix/evidence/approval-mode-refactor/runtime.json",
+    "approvalEvidence": "controller://exception/hermes-approval-mode-refactor-20260818"
+  },
+  "verification": {
+    "checks": [
+      {
+        "name": "Python lints / ruff enforcement (blocking)",
+        "evidence": ".helix/evidence/approval-mode-refactor/checks.json"
+      }
+    ],
+    "checker": "hermes-parent-quality-challenger",
+    "checkerEvidence": "controller://checker/hermes-approval-mode-refactor-20260818"
+  }
+}
